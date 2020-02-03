@@ -16,13 +16,12 @@ def get_dataset(file_path, **kwargs):
         file_path,
         batch_size=1,
         label_name = label_column,
-        na_value="?",
+        na_value="",
         num_epochs=1,
         ignore_errors=True,
+        shuffle=False,
         **kwargs)
     return dataset
-
-#raw_data = get_dataset(train_file_path)
 
 def show_batch(dataset):
     for batch, label in dataset.take(5):
@@ -30,10 +29,7 @@ def show_batch(dataset):
             print("{:20s}: {}".format(key, value.numpy()))
         print("\n")
 
-#show_batch(raw_data)
-
 csv_columns = ['storyid', 'storytitle', 'sentence1', 'sentence2', 'sentence3', 'sentence4', 'sentence5']
-#csv_columns = ['storyid', 'storytitle', 'sentence1']
 
 temp_dataset = get_dataset(train_file_path, select_columns=csv_columns)
 
