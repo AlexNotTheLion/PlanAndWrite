@@ -1,9 +1,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+
+from rake_nltk import Rake
+
 import functools
 
 import numpy as np
 
 import tensorflow as tf
+
+r = Rake()
 
 train_file_path = "ROCStories.csv"
 
@@ -24,7 +29,7 @@ def get_dataset(file_path, **kwargs):
     return dataset
 
 def show_batch(dataset):
-    for batch, label in dataset.take(5):
+    for batch, label in dataset.take(1):
         for key, value in batch.items():
             print("{:20s}: {}".format(key, value.numpy()))
         print("\n")
