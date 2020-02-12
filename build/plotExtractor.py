@@ -14,21 +14,25 @@ import tensorflow as tf
 
 r = rake.Rake("SmartStoplist.txt",1,2)
 
-train_file_path = "ROCStories.csv"
+ROC17 = "ROC17.csv"
+ROC16 = "ROC16.csv"
 plot_file = "storyplot.csv"
 
-with open(train_file_path) as f:
-    row_count = sum(1 for row in f)
-bar = IncrementalBar('building dataset', max=row_count)
+with open(ROC17) as f:
+    rc17 = sum(1 for row in f)
+
+with open(ROC16) as f:
+    rc16 = sum(1 for row in f)
+bar = IncrementalBar('building dataset', max=rc17 + rc16 - 2)
 
 with open('storyplot.csv', 'w', newline='') as f:
-        fieldname = ['storyid','storyitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
+        fieldname = ['storyid','storytitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
         writeCsv = csv.DictWriter(f, fieldnames = fieldname)
 
         writeCsv.writeheader()
 
 def addStoryPlotCsv(file_path, sentenceList, title, storyid):
-    with open('storyplot.csv', 'a', newline='') as af:
+    with open('storyplot.csv', 'a', newline='', encoding='utf-8') as af:
         fieldname = ['storyid','storytitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
         write = csv.DictWriter(af, fieldnames = fieldname)
 
@@ -58,28 +62,29 @@ def show_batch(dataset):
         id = ""
         sentenceList = []
         for key, value in batch.items():
-            keyItem = ("",-1) #create an empty list of tuples 
+            keyItem = ("",-1) #create an empty list of tuples
             sentence = value.numpy()
             sentence = np.array([x.decode() for x in sentence])#convert from array string
             sentence = str("{}".format(sentence))#convert string to utf8
             sentence = sentence[2:-2]#remove [' characteters from string
             #out = str("{:12s}: {}".format(key, sentence))
-            #print(out)
+                                                 #print(out)
 
-            if (key == "storyid" ):
+            if (key == "storyid"):
                 id = sentence
                 continue
 
             if(key == "storytitle"):
                 name = sentence
-                continue;
+                continue
 
             key = r.run(sentence, sep=u'[,.?!]')#extract most important word from given sentence
 
             keysents = [k for k, s in key.items()]
             sorted_keysents = sorted(keysents, key=operator.itemgetter(1,2))#convert to ordererd list
             for k, si, wi in sorted_keysents:#k is the key word, si is sentence index, and wi is word index
-                #store tuplet in list of word and value, if value is larger than previous value replace it
+                #store tuplet in list of word and value, if value is larger
+                                                             #than previous value replace it
                 t = (k, wi)
                 if(keyItem[1] < t[1]):
                     keyItem = t
@@ -95,6 +100,9 @@ def show_batch(dataset):
 
 csv_columns = ['storyid', 'storytitle', 'sentence1', 'sentence2', 'sentence3', 'sentence4', 'sentence5']
 
-temp_dataset = get_dataset(train_file_path, select_columns=csv_columns)
+winter_dataset = get_dataset(ROC17, select_columns=csv_columns)
+spring_dataset = get_dataset(ROC16, select_columns=csv_columns)
 
-show_batch(temp_dataset)
+final_dataset = winter_dataset.concatenate(spring_dataset)
+
+show_batch(final_dataset)
