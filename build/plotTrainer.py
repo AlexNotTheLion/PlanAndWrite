@@ -7,10 +7,9 @@ from tensorflow import keras
 
 train_file_path = "storyplot.csv"
 
-
 def get_dataset(file_path, **kwargs):
     dataset = tf.data.experimental.make_csv_dataset(file_path,
-        batch_size=1,
+        batch_size=5,
         label_name = None,
         na_value="",
         num_epochs=1,
@@ -33,7 +32,7 @@ csv_columns = ['storytitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
 
 storyplot_dataset = get_dataset(train_file_path, select_columns=csv_columns)
 
-#show_batch(temp_dataset)
+show_batch(storyplot_dataset)
 
 
 #just for storyline planning
@@ -42,17 +41,8 @@ storyplot_dataset = get_dataset(train_file_path, select_columns=csv_columns)
 #network
 #generates words in the storyline using another single-directional LSTM
 
-(train_data, test_data), info = tfds.load(
-    storyplot_dataset, 
-    split=(tfds.Split.TRAIN, tfds.Split.TEST),
-    with_info=True, as_supervised=True)
 
-encoder = info.features[storyplot_dataset].encoder
-encoder.subwords[:20]
+#(train_data, train_labels), (test_data, test_labels) = storyplot_dataset.load_data(num_words=100000)
 
-mnist = tf.keras.datasets.mnist
+#print(train_data[0])
 
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Embedding(encoder.vocab_size, 64),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64))
-    ])
