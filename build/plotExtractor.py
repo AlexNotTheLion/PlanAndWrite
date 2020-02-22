@@ -16,7 +16,7 @@ r = rake.Rake("SmartStoplist.txt",1,2)
 
 ROC17 = "ROC17.csv"
 ROC16 = "ROC16.csv"
-plot_file = "storyplot.csv"
+plot_file = "storyplot_test.csv"
 
 with open(ROC17) as f:
     rc17 = sum(1 for row in f)
@@ -25,14 +25,14 @@ with open(ROC16) as f:
     rc16 = sum(1 for row in f)
 bar = IncrementalBar('building dataset', max=rc17 + rc16 - 2)
 
-with open('storyplot.csv', 'w', newline='') as f:
+with open(plot_file, 'w', newline='') as f:
         fieldname = ['storyid','storytitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
         writeCsv = csv.DictWriter(f, fieldnames = fieldname)
 
         writeCsv.writeheader()
 
 def addStoryPlotCsv(file_path, sentenceList, title, storyid):
-    with open('storyplot.csv', 'a', newline='', encoding='utf-8') as af:
+    with open(file_path, 'a', newline='', encoding='utf-8') as af:
         fieldname = ['storyid','storytitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
         write = csv.DictWriter(af, fieldnames = fieldname)
 
