@@ -4,13 +4,15 @@ import functools
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-import tensorflow_datasets as tfds
-from keras_preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.text import Tokenizer
 
 train_file_path = "storyplot.csv"
+vocab_file = "vocab.txt"
+
+getVocab = False
+storeData = False
 
 vocab = []
-vocab_new = []
 
 with open(train_file_path) as f:
     csvLen = sum(1 for row in f)
@@ -48,18 +50,37 @@ storyplot_dataset = get_dataset(train_file_path, select_columns=csv_columns)
 
 packed_dataset = storyplot_dataset.map(pack)
 
-for item, _ in packed_dataset:
-    for text in item:
-        for t in text:
-            sentence = t.numpy()
-            sentence = str("{}".format(sentence))#convert string to utf8
-            sentence = sentence[2:-1]#remove [' characteters from string
-            vocab.append(sentence)
-           
+if(getVocab):
+    print("\nextracting vocab from dataset")
+    for item, _ in packed_dataset:
+        data_text = ""
+        for text in item:
+            for t in text:
+                sentence = t.numpy()
+                sentence = str("{}".format(sentence))#convert string to utf8
+                sentence = sentence[2:-1]#remove [' characteters from string
+                data_text += sentence + " "
+        vocab.append(data_text)
+    print("vocab extraction complete\n")
+
+    if(storeData):
+        with open(vocab_file, 'w') as f:
+            for item in vocab:
+                f.write("%s\n" % item)
+        print("Vocab stored in txt")
+else:
+    print("loading vocab from file")
+    vocab = open(vocab_file).readlines()
+    print("file loaded")
+
+test_data =['i love my dog', 'you love my cat!']
+
 t = Tokenizer()
 t.fit_on_texts(vocab)
-encoder = tfds.features.text.TokenTextEncoder(t.word_index)
-print("token size : {}".format(encoder.vocab_size))
+print("token size : {}".format(len(t.word_index)))
+
+test_seq = t.texts_to_sequences(test_data)
+print(test_seq)
 
 # for item, _ in packed_dataset.take(1):
 #     for text in item:
@@ -71,21 +92,21 @@ print("token size : {}".format(encoder.vocab_size))
 #             encoded_t = encoder.encode(sentence)
 #             print(encoded_t)
 
-def encode(text_tensor, label):
-    encoded_text = encoder.encode(text_tensor.numpy())
-    return encoded_text, label
+# def encode(text_tensor, label):
+#     encoded_text = encoder.encode(text_tensor.numpy())
+#     return encoded_text, label
 
-def encode_map_fn(text, label):
-    encoded_text, label = tf.py_function(encode,inp=[text, label], Tout=(tf.int64, tf.int64))
+# def encode_map_fn(text, label):
+#     encoded_text, label = tf.py_function(encode,inp=[text, label], Tout=(tf.int64, tf.int64))
 
-    encoded_text.set_shape([None])
-    label.set_shape([])
+#     encoded_text.set_shape([None])
+#     label.set_shape([])
 
-    return encoded_text, label
+#     return encoded_text, label
 
-all_encoded_data = packed_dataset.map(encode_map_fn)
+# all_encoded_data = packed_dataset.map(encode_map_fn)
 
-print(all_encoded_data.dtype)
+# print(all_encoded_data.dtype)
 
 
 # BUFFER_SIZE = 50000
@@ -104,12 +125,13 @@ print(all_encoded_data.dtype)
 # train_batch, train_labels = next(iter(train_batches))
 # print(train_batch.numpy())
 
-model = keras.Sequential([
-    keras.layers.Embedding(encoder.vocab_size, 16),
-    keras.layers.GlobalAveragePooling1D(),
-    keras.layers.Dense(16, activation='relu'),
-    keras.layers.Dense(1)
-])
+# model = keras.Sequential([
+#     keras.layers.Bidirectional(keras.layers.LSTM)
+#     keras.layers.Embedding(encoder.vocab_size, 16),
+#     keras.layers.GlobalAveragePooling1D(),
+#     keras.layers.Dense(16, activation='relu'),
+#     keras.layers.Dense(1)
+# ])
 
 # model.complie(optimizer='adam', 
 # loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
