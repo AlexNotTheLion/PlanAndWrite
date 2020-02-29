@@ -26,23 +26,23 @@ with open(ROC16) as f:
 bar = IncrementalBar('building dataset', max=rc17 + rc16 - 2)
 
 with open(plot_file, 'w', newline='') as f:
-        fieldname = ['storyid','storytitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
+        fieldname = ['storyid','storytitle', 'key1', 'key2', 'key3', 'key4', 'key5']
         writeCsv = csv.DictWriter(f, fieldnames = fieldname)
 
         writeCsv.writeheader()
 
 def addStoryPlotCsv(file_path, sentenceList, title, storyid):
     with open(file_path, 'a', newline='', encoding='utf-8') as af:
-        fieldname = ['storyid','storytitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
+        fieldname = ['storyid','storytitle', 'key1', 'key2', 'key3', 'key4', 'key5']
         write = csv.DictWriter(af, fieldnames = fieldname)
 
         write.writerow({'storyid' : storyid,
                             'storytitle' : title, 
-                            'key 1' : sentenceList[0],
-                            'key 2' : sentenceList[1],
-                            'key 3' : sentenceList[2],
-                            'key 4' : sentenceList[3],
-                            'key 5' : sentenceList[4]})
+                            'key1' : sentenceList[0],
+                            'key2' : sentenceList[1],
+                            'key3' : sentenceList[2],
+                            'key4' : sentenceList[3],
+                            'key5' : sentenceList[4]})
 
 def get_dataset(file_path, **kwargs):
     dataset = tf.data.experimental.make_csv_dataset(file_path,

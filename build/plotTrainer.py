@@ -5,8 +5,9 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.preprocessing.text import Tokenizer
+import pandas as pd
 
-train_file_path = "storyplot.csv"
+csv_file_path = "storyplot.csv"
 vocab_file = "vocab.txt"
 
 getVocab = False
@@ -14,7 +15,7 @@ storeData = False
 
 vocab = []
 
-with open(train_file_path) as f:
+with open(csv_file_path) as f:
     csvLen = sum(1 for row in f)
 
 def get_dataset(file_path, **kwargs):
@@ -44,100 +45,46 @@ def pack(features, labels):
     return tf.stack(list(features.values()), axis = 1), labels
 
 
-csv_columns = ['storyid', 'storytitle', 'key 1', 'key 2', 'key 3', 'key 4', 'key 5']
+csv_columns = ['storyid', 'storytitle', 'key1', 'key2', 'key3', 'key4', 'key5']
 
-storyplot_dataset = get_dataset(train_file_path, select_columns=csv_columns)
+storyplot_dataset = get_dataset(csv_file_path, select_columns=csv_columns)
 
 packed_dataset = storyplot_dataset.map(pack)
 
-if(getVocab):
-    print("\nextracting vocab from dataset")
-    for item, _ in packed_dataset:
-        data_text = ""
-        for text in item:
-            for t in text:
-                sentence = t.numpy()
-                sentence = str("{}".format(sentence))#convert string to utf8
-                sentence = sentence[2:-1]#remove [' characteters from string
-                data_text += sentence + " "
-        vocab.append(data_text)
-    print("vocab extraction complete\n")
 
-    if(storeData):
-        with open(vocab_file, 'w') as f:
-            for item in vocab:
-                f.write("%s\n" % item)
-        print("Vocab stored in txt")
-else:
-    print("loading vocab from file")
-    vocab = open(vocab_file).readlines()
-    print("file loaded")
-
-test_data =['i love my dog', 'you love my cat!']
+print("loading vocab from csv")
+df = pd.read_csv(csv_file_path, usecols=[1,2,3,4,5,6], encoding="utf-8")
+vocab = df[['storytitle', 'key1', 'key2', 'key3', 'key4', 'key5']].agg(' '.join, axis=1).tolist()
+print("file loaded")
 
 t = Tokenizer()
 t.fit_on_texts(vocab)
 print("token size : {}".format(len(t.word_index)))
 
-test_seq = t.texts_to_sequences(test_data)
-print(test_seq)
+# b = Tokenizer()
+# b.fit_on_texts(vocab2)
+# print("token size b : {}".format(len(b.word_index)))
 
-# for item, _ in packed_dataset.take(1):
-#     for text in item:
-#         for t in text:
-#             sentence = t.numpy()
-#             sentence = str("{}".format(sentence))#convert string to utf8
-#             sentence = sentence[2:-1]#remove [' characteters from string
-#             print(sentence)
-#             encoded_t = encoder.encode(sentence)
-#             print(encoded_t)
+# test_seq = t.texts_to_sequences(test_data)
+# print(test_seq)
 
-# def encode(text_tensor, label):
-#     encoded_text = encoder.encode(text_tensor.numpy())
-#     return encoded_text, label
+# for item in packed_dataset.take(1):
+#     print(item)
 
-# def encode_map_fn(text, label):
-#     encoded_text, label = tf.py_function(encode,inp=[text, label], Tout=(tf.int64, tf.int64))
+# print("Please enter a title")
+# title = input()
+# print("you entered: {}".format(title))
 
-#     encoded_text.set_shape([None])
-#     label.set_shape([])
+# model = keras.Sequential(
 
-#     return encoded_text, label
+# )
 
-# all_encoded_data = packed_dataset.map(encode_map_fn)
+#shape is the shape of the data array e.g. a picture has size x, size y, color depth, for my data its 1,6 (1 story, 6 sentences inc title)
+#from that get a basic prediction working, add a title and get a crappy probably bad sentence
 
-# print(all_encoded_data.dtype)
-
-
-# BUFFER_SIZE = 50000
-# BATCH_SIZE = 64
-# TAKE_SIZE = 5000
-
-# train_data = all_encoded_data.skip(TAKE_SIZE).shuffle(BUFFER_SIZE)
-# train_data = train_data.padded_batch(BATCH_SIZE)
-
-# test_data = all_encoded_data.skip(TAKE_SIZE)
-# test_data = test_data.padded_batch(BATCH_SIZE)
-
-# train_batches = train_data.shuffle(1000).padded_batch(10)
-# test_batch = test_data.shuffle(1000).padded_batch(10)
-
-# train_batch, train_labels = next(iter(train_batches))
-# print(train_batch.numpy())
-
-# model = keras.Sequential([
-#     keras.layers.Bidirectional(keras.layers.LSTM)
-#     keras.layers.Embedding(encoder.vocab_size, 16),
-#     keras.layers.GlobalAveragePooling1D(),
-#     keras.layers.Dense(16, activation='relu'),
-#     keras.layers.Dense(1)
-# ])
-
-# model.complie(optimizer='adam', 
-# loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-# metrics=['accuracy'])
-
-# history = model.fit(train_batch, epochs = 10, validation_data=test_batch, validation_steps = 20)
+#paper:
+#using a seq to seq model, conditional genration model, first encoded title into a vecotr using a BILSTM, 
+#and generates words in storyline using a single direction LSTM
 
 #vocab sizes
 #29219 words for storyplot csv
