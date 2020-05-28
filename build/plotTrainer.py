@@ -39,6 +39,7 @@ print("file loaded")
 
 word_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='')
 word_tokenizer.fit_on_texts(vocab)
+#these need to be two sepparate vocabulary lists, one for input, one for output, allowing matching of one to the other during decoding
 
 input_tensor, target_tensor = load_dataset(data)
 

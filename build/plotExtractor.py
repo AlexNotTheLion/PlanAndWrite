@@ -2,6 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import rake
 import operator
+import colorama
+from colorama import Fore,Style
+colorama.init()
+
 
 from progress.bar import IncrementalBar
 
@@ -56,7 +60,7 @@ def get_dataset(file_path, **kwargs):
     return dataset
 
 def show_batch(dataset):
-    for batch in dataset:
+    for batch in dataset.take(1):
         story = ""
         name = ""
         id = ""
@@ -77,20 +81,27 @@ def show_batch(dataset):
             if(key == "storytitle"):
                 name = sentence
                 continue
-
+            
+            # print(f'This is {Fore.GREEN}color{Style.RESET_ALL}!')
             key = r.run(sentence, sep=u'[,.?!]')#extract most important word from given sentence
+            print(f'\n{Fore.GREEN}Original sentence{Style.RESET_ALL}: ' + sentence)
 
+            # print("\nf'{Fore.GREEN}Original sentence{Style.RESET_ALL}: {}".format(sentence))
             keysents = [k for k, s in key.items()]
             sorted_keysents = sorted(keysents, key=operator.itemgetter(1,2))#convert to ordererd list
             for k, si, wi in sorted_keysents:#k is the key word, si is sentence index, and wi is word index
+                print("key: {}   score: {}".format(k,wi))
                 #store tuplet in list of word and value, if value is larger
                                                              #than previous value replace it
                 t = (k, wi)
                 if(keyItem[1] < t[1]):
                     keyItem = t
-                    
+            
+            print(f'{Fore.BLUE}Highest rank key to be stored{Style.RESET_ALL}: ' + keyItem[0])
+
                     
             sentenceList.append(keyItem[0])
+        print("\n\n")
         
         addStoryPlotCsv(plot_file, sentenceList, name, id)
         #print(sentenceList)
