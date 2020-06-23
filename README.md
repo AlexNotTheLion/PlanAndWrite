@@ -1,2 +1,0 @@
-# PlanAndWrite
-dissertation project 
